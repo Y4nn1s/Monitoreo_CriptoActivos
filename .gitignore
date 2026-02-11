@@ -1,0 +1,50 @@
+# #############################################################################
+# Archivos y carpetas ignorados para Git (Angular/Node.js)
+# #############################################################################
+
+# Dependencias (Esta es la más importante para no subir miles de archivos)
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache y temporales de Angular
+.angular/
+**/ .angular/
+.sass-cache/
+/connect.lock
+/coverage
+/typings
+
+# Carpeta de compilación (Output)
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# Archivos de configuración del Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Configuración de Editores e IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.history/
+
+# Archivos de Entorno y Notas (PDFs del ejercicio)
+.env
+.env.*
+*.pdf
+Ejercicio_2.md
+__screenshots__/

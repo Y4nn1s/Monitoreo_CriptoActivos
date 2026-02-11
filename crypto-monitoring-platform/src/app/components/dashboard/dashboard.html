@@ -1,0 +1,125 @@
+<div class="min-h-screen bg-slate-900 text-slate-100 p-8 font-sans">
+  <header class="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div>
+      <h1 class="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 mb-2">
+        Monitor de Criptomonedas
+      </h1>
+      <p class="text-slate-400 font-medium">Análisis en tiempo real e información del mercado</p>
+    </div>
+    
+
+  </header>
+
+  <main class="max-w-7xl mx-auto">
+    <!-- Barra de Indicadores Estadísticos -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Promedio de Mercado</div>
+        <div class="text-2xl font-bold text-white">
+          ${{ stats()?.average | number:'1.2-2' }}
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Volatilidad (DE)</div>
+        <div class="text-2xl font-bold text-amber-400">
+          {{ stats()?.volatility | number:'1.4-4' }}
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Precio Máximo</div>
+        <div class="text-2xl font-bold text-emerald-400">
+          ${{ stats()?.maxPrice | number:'1.2-2' }}
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Tiempo de Procesamiento</div>
+        <div class="text-xl font-mono text-blue-400">
+          {{ stats()?.calcTime | number:'1.2-4' }}ms
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles de Alerta y Título de Sección -->
+    <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
+      <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+        <span class="w-2 h-8 bg-blue-500 rounded-full"></span>
+        Cotizaciones en Vivo
+      </h2>
+      
+      <div class="bg-slate-800/50 backdrop-blur-sm p-3 rounded-xl border border-slate-700/50 shadow-lg flex items-center gap-3">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Alerta ($)
+        </label>
+        <input 
+          type="number" 
+          [ngModel]="alertThreshold()" 
+          (ngModelChange)="updateThreshold($event)"
+          class="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 w-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-right"
+          placeholder="0.00">
+      </div>
+    </div>
+
+    <!-- Cuadrícula Principal de Tarjetas de Criptomonedas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (coin of filteredPrices(); track coin.id) {
+        <app-crypto-card 
+          [data]="coin" 
+          [alertThreshold]="alertThreshold()">
+        </app-crypto-card>
+      }
+    </div>
+
+    <!-- Sección de Mejores Rendimientos (Signal computada para cambios mayores a 5%) -->
+    @if (topGainers().length > 0) {
+      <div class="mt-10">
+        <h2 class="text-2xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+          <span class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></span>
+          Principales Ganadores (> 5%)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (gainer of topGainers(); track gainer.id) {
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                  {{ gainer.symbol }}
+                </div>
+                <span class="text-white font-semibold">{{ gainer.name }}</span>
+              </div>
+              <span class="text-emerald-400 font-bold text-lg">+{{ gainer.changePercent | number:'1.2-2' }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </main>
+
+  <footer class="max-w-7xl mx-auto mt-20 pt-8 pb-8 border-t border-slate-800 text-sm text-slate-500 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex flex-col items-center md:items-start gap-1">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-300">Monitor de Criptomonedas</span>
+        <span class="hidden md:inline w-1 h-4 bg-slate-700 mx-2"></span>
+        <span class="text-blue-400">Programación III - Trayecto 3</span>
+      </div>
+      <p class="text-xs text-slate-600">UNETI • Semestre 5</p>
+    </div>
+    
+    <div class="flex flex-col items-center md:items-end gap-2">
+      <p class="font-medium">Desarrollado por <span class="text-blue-400 font-bold">Yannis Iturriago</span></p>
+      
+      <!-- Tecnologías Core del Proyecto -->
+      <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+        <span>Angular 19</span>
+        <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+        <span>Tailwind CSS</span>
+        <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+        <span>RxJS Signals</span>
+      </div>
+
+      <!-- Enlace al Repositorio de Código -->
+      <a href="https://github.com/" target="_blank" class="mt-1 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        <span>Ver Repositorio en GitHub</span>
+      </a>
+    </div>
+  </footer>
+</div>

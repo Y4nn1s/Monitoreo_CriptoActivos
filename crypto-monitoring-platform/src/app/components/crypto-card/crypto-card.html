@@ -1,0 +1,65 @@
+<!-- Tarjeta individual de criptomoneda con efectos visuales y sistema de alertas -->
+<div
+  class="relative p-6 rounded-2xl backdrop-blur-md transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
+  [ngClass]="
+    alertThreshold > 0 && data.price > alertThreshold
+      ? 'border-2 border-red-500 bg-red-500/5 shadow-lg shadow-red-500/20'
+      : 'border border-white/10 bg-white/5'
+  "
+  [appHighlightChange]="data.price"
+>
+  <!-- Encabezado de la tarjeta: Logo, Nombre y Precio -->
+  <div class="flex justify-between items-start mb-4">
+    <div class="flex items-center gap-3">
+      <!-- Icono generado con el Símbolo -->
+      <div
+        class="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30"
+      >
+        {{ data.symbol }}
+      </div>
+      <div>
+        <h3 class="text-white font-bold text-lg tracking-tight">{{ data.name }}</h3>
+        <span class="text-slate-400 text-xs font-medium uppercase tracking-wider"
+          >Volumen: {{ data.volume | number: '1.0-0' }}</span
+        >
+      </div>
+    </div>
+    
+    <!-- Información de precio y variación porcentual -->
+    <div class="text-right">
+      <div class="text-white font-mono font-bold text-xl tracking-tight">
+        ${{ data.price | number: '1.2-2' }}
+      </div>
+      <div
+        class="text-xs font-bold px-2 py-1 rounded-full inline-block mt-1"
+        [ngClass]="
+          data.changePercent >= 0
+            ? 'bg-emerald-500/10 text-emerald-400'
+            : 'bg-red-500/10 text-red-400'
+        "
+      >
+        {{ data.changePercent >= 0 ? '+' : '' }}{{ data.changePercent | number: '1.2-2' }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de progreso visual que indica la tendencia del mercado -->
+  <div class="w-full bg-slate-700/30 h-1 rounded-full overflow-hidden">
+    <div
+      class="h-full transition-all duration-500 ease-out"
+      [ngClass]="data.changePercent >= 0 ? 'bg-emerald-500' : 'bg-red-500'"
+      [style.width.%]="50 + data.changePercent * 5"
+    ></div>
+  </div>
+
+  <!-- Indicador visual de alerta (se activa si el precio supera el umbral configurado) -->
+  <div
+    *ngIf="alertThreshold > 0 && data.price > alertThreshold"
+    class="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"
+  ></div>
+  <div
+    *ngIf="alertThreshold > 0 && data.price > alertThreshold"
+    class="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900"
+  ></div>
+</div>
+
