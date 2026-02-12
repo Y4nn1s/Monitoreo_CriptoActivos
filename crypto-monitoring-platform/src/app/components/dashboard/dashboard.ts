@@ -5,47 +5,75 @@ import { CryptoDataService, PriceData } from '../../services/crypto-data';
 import { CryptoCard } from '../crypto-card/crypto-card';
 
 /**
- * Componente principal del Dashboard.
- * Gestiona la visualización global, el filtrado de datos y el Web Worker para estadísticas.
+ * Orquestador principal de la plataforma.
+ * Coordina el flujo de datos entre el servicio de precios, los filtros de búsqueda,
+ * los umbrales de alerta y el procesamiento estadístico en segundo plano.
  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, DecimalPipe, CryptoCard],
   templateUrl: './dashboard.html',
-  changeDetection: ChangeDetectionStrategy.OnPush // Optimización de rendimiento
+  changeDetection: ChangeDetectionStrategy.OnPush // Optimización para minimizar ciclos de renderizado.
 })
 export class Dashboard implements OnInit, OnDestroy {
   private cryptoService = inject(CryptoDataService);
   
-  // Signal para manejar el umbral de alerta definido por el usuario.
+  // Umbral de alerta configurable por el usuario para disparar efectos visuales.
   alertThreshold = signal<number>(0);
   
-  // Obtenemos directamente la Signal de precios del servicio.
+  // Acceso directo al flujo de precios global.
   readonly prices = this.cryptoService.prices;
   
-  // Signal computada: lista filtrada (en este caso devuelve todo, pero extensible).
-  readonly filteredPrices = computed(() => this.prices());
+  // Estado reactivo para el término de búsqueda actual.
+  searchTerm = signal<string>('');
+  
+  /**
+   * Lista de precios filtrada dinámicamente.
+   * Se usó 'computed' para asegurar que el filtrado solo se ejecute cuando 
+   * cambian los precios o el término de búsqueda, maximizando la eficiencia.
+   */
+  readonly filteredPrices = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const allPrices = this.prices();
+    
+    if (!term) return allPrices;
+    
+    return allPrices.filter(p => 
+      p.name.toLowerCase().includes(term) || 
+      p.symbol.toLowerCase().includes(term)
+    );
+  });
 
   /**
-   * Signal computada para las criptomonedas con mayor crecimiento (> 5%).
-   * Se actualiza automáticamente cada vez que cambian los precios.
+   * Cálculo en tiempo real del promedio de la lista visible.
+   * Este valor se actualiza automáticamente al escribir en el buscador.
    */
-  readonly topGainers = computed(() => {
-    return this.prices()
-      .filter(p => p.changePercent > 5)
-      .sort((a, b) => b.changePercent - a.changePercent);
+  readonly filteredAverage = computed(() => {
+    const prices = this.filteredPrices();
+    if (prices.length === 0) return 0;
+    const total = prices.reduce((acc, p) => acc + p.price, 0);
+    return total / prices.length;
+  });
+
+  /**
+   * Identifica al activo con mejor rendimiento porcentual del mercado.
+   */
+  readonly marketLeader = computed(() => {
+    const list = [...this.prices()].sort((a, b) => b.changePercent - a.changePercent);
+    return list.length > 0 ? list[0] : null;
   });
   
-  // Estado para las estadísticas calculadas por el Web Worker.
+  // Almacena las estadísticas complejas procesadas fuera del hilo principal.
   stats = signal<{ average: number, volatility: number, maxPrice: number, calcTime: number } | null>(null);
 
   private worker: Worker | undefined;
 
   constructor() {
     /**
-     * Definimos un efecto que se dispara cada vez que cambian los precios.
-     * Envía los datos al Web Worker para realizar cálculos pesados en segundo plano.
+     * Sincronización con el Web Worker.
+     * Cada vez que la Signal 'prices' emite nuevos datos, los enviamos al Worker
+     * de forma transparente para su procesamiento analítico.
      */
     effect(() => {
       const currentPrices = this.prices();
@@ -56,26 +84,33 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Inicialización del Web Worker.
+    // Configuración del entorno multihilo.
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../stats.worker', import.meta.url));
       
-      // Escuchamos la respuesta del Worker y actualizamos la Signal de estadísticas.
+      // Se capturan los resultados del Worker y se actualiza el estado visual.
       this.worker.onmessage = ({ data }) => {
         this.stats.set(data);
       };
     } else {
-      console.warn('Los Web Workers no son compatibles con este navegador.');
+      console.warn('Este navegador no soporta Web Workers. Los cálculos estadísticos estarán deshabilitados.');
     }
   }
 
   ngOnDestroy() {
-    // Limpieza: terminamos el worker para liberar recursos.
+    // Liberación de recursos: se cierra el hilo del worker al destruir el componente.
     this.worker?.terminate();
   }
 
   /**
-   * Actualiza el valor de la alerta basado en el input del usuario.
+   * Puente para actualizar el término de búsqueda desde el template.
+   */
+  updateSearchTerm(value: string) {
+    this.searchTerm.set(value);
+  }
+
+  /**
+   * Actualiza el valor de referencia para las alertas de precio.
    */
   updateThreshold(value: string) {
     this.alertThreshold.set(Number(value));

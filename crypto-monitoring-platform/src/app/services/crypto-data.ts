@@ -2,27 +2,29 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { interval, map, Observable } from 'rxjs';
 
 /**
- * Interfaz que define la estructura de los datos de cada criptomoneda.
+ * Define la forma de los datos para cada criptomoneda en el sistema.
+ * Incluye metadatos básicos y métricas de mercado para el renderizado.
  */
 export interface PriceData {
   id: string;
   name: string;
   symbol: string;
   price: number;
-  changePercent: number; // Cambio en las últimas 24 horas
+  changePercent: number; // Porcentaje de variación en el ciclo de simulación
   volume: number;
   lastUpdate: Date;
 }
 
 /**
- * Este servicio se encarga de gestionar y simular los datos de precios 
- * de las criptomonedas en tiempo real.
+ * Núcleo de datos de la aplicación.
+ * Este servicio centraliza el estado de los precios y gestiona la simulación 
+ * de mercado de alta frecuencia (200ms).
  */
 @Injectable({
   providedIn: 'root',
 })
 export class CryptoDataService {
-  // Datos iniciales para que la aplicación no empiece vacía.
+  // Lista inicial para que la interfaz tenga datos coherentes desde el primer frame.
   private initialData: PriceData[] = [
     {
       id: 'bitcoin',
@@ -72,48 +74,55 @@ export class CryptoDataService {
   ];
 
   /** 
-   * Utilizamos Angular Signals para manejar el estado de los precios.
-   * Esto permite una detección de cambios mucho más eficiente que la tradicional.
+   * Signal reactiva que contiene el estado global de los precios.
+   * Al ser readonly, los componentes solo pueden suscribirse a los cambios
+   * pero no mutar el estado directamente desde afuera.
    */
   readonly prices: WritableSignal<PriceData[]> = signal(this.initialData);
 
   constructor() {
-    // Iniciamos la simulación en cuanto se crea el servicio.
+    // Al instanciar el servicio, se arranca de inmediato el "feed" de datos.
     this.startSimulation();
   }
 
   /**
-   * Configura un intervalo que actualiza los precios cada 200ms
-   * para imitar un feed de alta frecuencia.
+   * Orquesta el flujo de actualizaciones periódicas.
+   * Se usa interval de RxJS para mantener un ritmo constante de 200ms.
    */
   private startSimulation() {
     interval(200)
       .pipe(map(() => this.simulatePriceChanges(this.prices())))
       .subscribe((updatedPrices) => {
-        // Actualizamos la Signal con los nuevos valores calculados.
+        // Notificamos a toda la aplicación actualizando la Signal raíz.
         this.prices.set(updatedPrices);
       });
   }
 
   /**
-   * Lógica interna para simular movimientos de mercado realistas.
-   * Aplica volatilidad y una tendencia de "reversión a la media".
+   * Motor de fluctuación de mercado.
+   * Calcula variaciones pseudo-aleatorias aplicando algoritmos de 
+   * volatilidad y reversión a la media.
    */
   private simulatePriceChanges(currentPrices: PriceData[]): PriceData[] {
     return currentPrices.map((coin) => {
-      // Simulación de fluctuación de precio pequeña (max 0.2%)
-      const volatility = 0.002; 
+      // Se ajusta la volatilidad según el valor del activo.
+      // Los activos baratos (Cardano/XRP) necesitan más precisión (4 decimales)
+      // para que el movimiento sea perceptible visualmente.
+      const isLowValue = coin.price < 1.0;
+      const volatility = isLowValue ? 0.008 : 0.002; 
       const change = 1 + (Math.random() * volatility * 2 - volatility);
       const newPrice = coin.price * change;
 
-      // El porcentaje de cambio es más volátil y tiende a volver a cero (reversión a la media)
+      // Aplica una lógica de "reversión a la media" para que el porcentaje
+      // no suba o baje infinitamente, manteniendo la coherencia visual.
       const meanReversion = -coin.changePercent * 0.01;
-      const randomShift = Math.random() * 1.0 - 0.5; // ±0.5 por tick
+      const randomShift = Math.random() * 1.0 - 0.5; 
       const newChangePercent = coin.changePercent + meanReversion + randomShift;
 
       return {
         ...coin,
-        price: Number(newPrice.toFixed(2)),
+        // Redondeo dinámico: 4 decimales para activos pequeños, 2 para el resto.
+        price: Number(newPrice.toFixed(isLowValue ? 4 : 2)),
         changePercent: Number(newChangePercent.toFixed(2)),
         lastUpdate: new Date(),
       };

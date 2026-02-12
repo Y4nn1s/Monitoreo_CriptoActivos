@@ -1,24 +1,37 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { HighlightChange } from '../../directives/highlight-change';
 import { PriceData } from '../../services/crypto-data';
 
 /**
- * Este componente representa una tarjeta individual para cada criptomoneda.
- * Se encarga de mostrar el precio, el cambio porcentual y las alertas visuales.
+ * Componente de presentación (Dumb Component).
+ * Su única responsabilidad es renderizar la información de una criptomoneda específica
+ * y reaccionar visualmente a los cambios de estado dictados por el Dashboard.
  */
 @Component({
   selector: 'app-crypto-card',
   standalone: true,
   imports: [CommonModule, DecimalPipe, HighlightChange],
   templateUrl: './crypto-card.html',
-  changeDetection: ChangeDetectionStrategy.OnPush // Optimización: solo se renderiza si cambian sus Inputs.
+  changeDetection: ChangeDetectionStrategy.OnPush // Optimizado para no re-renderizar si las inputs no cambian.
 })
 export class CryptoCard {
-  // Los datos de la criptomoneda que se van a mostrar.
-  @Input({ required: true }) data!: PriceData;
+  // Se recibe como una Signal reactiva.
+  data = input.required<PriceData>();
   
-  // El umbral de alerta definido en el Dashboard para resaltar precios altos.
-  @Input() alertThreshold: number = 0;
+  // Nivel de precio que el usuario considera crítico.
+  alertThreshold = input<number>(0);
+
+  /**
+   * Estado dinámico de la alerta.
+   * Se usa 'computed' para que la validación lógica se ejecute solo cuando 
+   * el precio actual o el umbral cambian, optimizando el rendimiento visual.
+   */
+  isAlertActive = computed(() => {
+    const threshold = this.alertThreshold();
+    const currentPrice = this.data().price;
+    // La alerta se activa si hay un umbral definido y el precio lo supera.
+    return threshold > 0 && currentPrice > threshold;
+  });
 }
 
