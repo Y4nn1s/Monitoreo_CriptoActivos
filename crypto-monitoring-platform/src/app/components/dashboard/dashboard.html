@@ -1,99 +1,138 @@
 <div class="min-h-screen bg-slate-900 text-slate-100 p-8 font-sans">
-  <header class="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
-    <div>
-      <h1 class="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 mb-2">
-        Monitor de Criptomonedas
-      </h1>
-      <p class="text-slate-400 font-medium">Análisis en tiempo real e información del mercado</p>
-    </div>
-    
+  <!-- Cabecera: Título y buscador global -->
+  <header
+    class="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-center gap-6"
+  >
+    <div class="flex flex-col md:flex-row justify-between items-center w-full gap-6">
+      <div>
+        <h1
+          class="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 mb-2"
+        >
+          Monitor de Criptomonedas
+        </h1>
+        <p class="text-slate-400 font-medium">Análisis en tiempo real e información del mercado</p>
+      </div>
 
+      <!-- Buscador: Filtra la lista de activos mediante una Signal computada -->
+      <div class="relative w-full md:w-96">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="updateSearchTerm($event)"
+          placeholder="Buscar criptomoneda..."
+          class="block w-full pl-10 pr-3 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl leading-5 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all backdrop-blur-sm shadow-lg"
+        >
+      </div>
+    </div>
   </header>
 
   <main class="max-w-7xl mx-auto">
-    <!-- Barra de Indicadores Estadísticos -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Promedio de Mercado</div>
-        <div class="text-2xl font-bold text-white">
-          ${{ stats()?.average | number:'1.2-2' }}
+    <!-- Panel de Indicadores: Muestra métricas globales y el líder actual del mercado -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      
+      <!-- Destacado: Activo con mayor crecimiento porcentual -->
+      <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/30 backdrop-blur-sm relative overflow-hidden group">
+        <div class="absolute -right-2 -top-2 opacity-10 group-hover:opacity-20 transition-opacity">
+          <svg class="h-20 w-20 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div class="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+          Líder de Mercado
+        </div>
+        <div class="flex items-center gap-2">
+           <div class="text-xl font-bold text-white">{{ marketLeader()?.name }}</div>
+           <div class="text-xs bg-emerald-500/20 text-emerald-400 px-1.5 rounded font-mono">{{ marketLeader()?.symbol }}</div>
+        </div>
+        <div class="text-lg font-black text-emerald-400">
+           +{{ marketLeader()?.changePercent | number: '1.2-2' }}%
         </div>
       </div>
+
+      <!-- Métricas calculadas por el Web Worker -->
       <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Volatilidad (DE)</div>
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+          Promedio de Mercado (SMA)
+        </div>
+        <div class="text-2xl font-bold text-white">${{ stats()?.average | number: '1.2-2' }}</div>
+        @if (searchTerm()) {
+          <div class="text-[10px] text-blue-400 font-bold mt-1 uppercase">
+            Filtrado: ${{ filteredAverage() | number: '1.2-2' }}
+          </div>
+        }
+      </div>
+
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+          Volatilidad Histórica
+        </div>
         <div class="text-2xl font-bold text-amber-400">
-          {{ stats()?.volatility | number:'1.4-4' }}
+          {{ stats()?.volatility | number: '1.4-4' }}
         </div>
       </div>
+
       <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Precio Máximo</div>
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+          Precio Máximo
+        </div>
         <div class="text-2xl font-bold text-emerald-400">
-          ${{ stats()?.maxPrice | number:'1.2-2' }}
+          ${{ stats()?.maxPrice | number: '1.2-2' }}
         </div>
       </div>
+
       <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Tiempo de Procesamiento</div>
+        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+          Carga de Computación
+        </div>
         <div class="text-xl font-mono text-blue-400">
-          {{ stats()?.calcTime | number:'1.2-4' }}ms
+          {{ stats()?.calcTime | number: '1.2-4' }}ms
         </div>
       </div>
     </div>
 
-    <!-- Controles de Alerta y Título de Sección -->
+    <!-- Sección de Cotizaciones: Control de alertas y lista de tarjetas -->
     <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
       <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
         <span class="w-2 h-8 bg-blue-500 rounded-full"></span>
         Cotizaciones en Vivo
       </h2>
-      
-      <div class="bg-slate-800/50 backdrop-blur-sm p-3 rounded-xl border border-slate-700/50 shadow-lg flex items-center gap-3">
+
+      <!-- Input de Alerta: Establece el umbral global para disparar efectos visuales -->
+      <div
+        class="bg-slate-800/50 backdrop-blur-sm p-3 rounded-xl border border-slate-700/50 shadow-lg flex items-center gap-3"
+      >
         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
           Alerta ($)
         </label>
-        <input 
-          type="number" 
-          [ngModel]="alertThreshold()" 
+        <input
+          type="number"
+          [ngModel]="alertThreshold()"
           (ngModelChange)="updateThreshold($event)"
           class="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 w-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-right"
-          placeholder="0.00">
+          placeholder="0.00"
+        />
       </div>
     </div>
 
-    <!-- Cuadrícula Principal de Tarjetas de Criptomonedas -->
+    <!-- Listado principal: Renderizado optimizado con trackBy (vía @for) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (coin of filteredPrices(); track coin.id) {
-        <app-crypto-card 
-          [data]="coin" 
-          [alertThreshold]="alertThreshold()">
-        </app-crypto-card>
+        <app-crypto-card [data]="coin" [alertThreshold]="alertThreshold()"> </app-crypto-card>
       }
     </div>
 
-    <!-- Sección de Mejores Rendimientos (Signal computada para cambios mayores a 5%) -->
-    @if (topGainers().length > 0) {
-      <div class="mt-10">
-        <h2 class="text-2xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
-          <span class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></span>
-          Principales Ganadores (> 5%)
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (gainer of topGainers(); track gainer.id) {
-            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex justify-between items-center">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">
-                  {{ gainer.symbol }}
-                </div>
-                <span class="text-white font-semibold">{{ gainer.name }}</span>
-              </div>
-              <span class="text-emerald-400 font-bold text-lg">+{{ gainer.changePercent | number:'1.2-2' }}%</span>
-            </div>
-          }
-        </div>
-      </div>
-    }
   </main>
 
-  <footer class="max-w-7xl mx-auto mt-20 pt-8 pb-8 border-t border-slate-800 text-sm text-slate-500 flex flex-col md:flex-row justify-between items-center gap-6">
+  <!-- Pie de página con créditos y stack tecnológico -->
+  <footer
+    class="max-w-7xl mx-auto mt-20 pt-8 pb-8 border-t border-slate-800 text-sm text-slate-500 flex flex-col md:flex-row justify-between items-center gap-6"
+  >
     <div class="flex flex-col items-center md:items-start gap-1">
       <div class="flex items-center gap-2">
         <span class="font-bold text-slate-300">Monitor de Criptomonedas</span>
@@ -102,22 +141,42 @@
       </div>
       <p class="text-xs text-slate-600">UNETI • Semestre 5</p>
     </div>
-    
+
     <div class="flex flex-col items-center md:items-end gap-2">
-      <p class="font-medium">Desarrollado por <span class="text-blue-400 font-bold">Yannis Iturriago</span></p>
-      
-      <!-- Tecnologías Core del Proyecto -->
+      <p class="font-medium">
+        Desarrollado por <span class="text-blue-400 font-bold">Yannis Iturriago</span>
+      </p>
+
+      <!-- Resumen del Stack: Muestra las tecnologías clave del proyecto -->
       <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
-        <span>Angular 19</span>
+        <span>Angular 21</span>
         <span class="w-1 h-1 rounded-full bg-slate-700"></span>
         <span>Tailwind CSS</span>
         <span class="w-1 h-1 rounded-full bg-slate-700"></span>
         <span>RxJS Signals</span>
       </div>
 
-      <!-- Enlace al Repositorio de Código -->
-      <a href="https://github.com/Y4nn1s/MonitoreoCriptoActivos" target="_blank" class="mt-1 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      <!-- Enlace social/repositorio -->
+      <a
+        href="https://github.com/Y4nn1s/MonitoreoCriptoActivos"
+        target="_blank"
+        class="mt-1 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+          ></path>
+        </svg>
         <span>Ver Repositorio en GitHub</span>
       </a>
     </div>

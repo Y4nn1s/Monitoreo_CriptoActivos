@@ -1,69 +1,70 @@
-# Plataforma de Monitoreo de Criptomonedas
+# Plataforma de Monitoreo de Criptoactivos
 
-Este proyecto es una aplicación web interactiva desarrollada en **Angular** para el monitoreo en tiempo real de precios de criptomonedas. Utiliza tecnologías modernas como **Angular Signals**, **Web Workers** para cálculos estadísticos intensivos y **Tailwind CSS**.
+[![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg?logo=angular&logoColor=white)](https://angular.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4+-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 Guía de Instalación (Windows)
+Esta es una aplicación de grado profesional desarrollada para el monitoreo en tiempo real del mercado de criptomonedas. La plataforma ha sido diseñada bajo estándares de alta disponibilidad y rendimiento, utilizando las últimas innovaciones de **Angular** para garantizar una experiencia de usuario fluida y reactiva.
 
-Para clonar este proyecto en otro computador con Windows, sigue estos pasos:
+## ✨ Características Principales
 
-### 1. Requisitos Previos
+- **📈 Feed en Tiempo Real:** Actualización dinámica de precios cada 200ms con simulaciones de mercado realistas.
+- **⚡ Arquitectura Multihilo:** Utiliza **Web Workers** para delegar el cálculo de estadísticas complejas (SMA, Volatilidad) fuera del hilo principal, manteniendo la interfaz a 60 FPS.
+- **� Feedback Visual Inteligente:**
+  - Directiva estructural personalizada (`*appHighlightChange`) para animaciones de fluctuación.
+  - Alertas configurables por el usuario con indicadores visuales de alta visibilidad (bordes amarillos, iconos de advertencia y destellos).
+- **💪 Gestión de Estado con Signals:** Flujo de datos optimizado mediante **Angular Signals**, eliminando ciclos de detección de cambios innecesarios.
+- **🔝 Indicadores de Mercado:** Visualización destacada del "Líder de Mercado" (activo con mayor crecimiento) y promedios globales.
+- **🔍 Filtrado Instantáneo:** Buscador integrado que actualiza métricas y visuales en tiempo real mediante Signals computadas.
+- **🎨 Diseño Premium:** Interfaz moderna con modo oscuro, tipografía optimizada y diseño responsivo utilizando **Tailwind CSS**.
 
-Asegurarse de tener instalado lo siguiente en tu sistema:
+## 🛠️ Stack Tecnológico
 
-- **Node.js**: Descargar la versión LTS desde [nodejs.org](https://nodejs.org/).
-- **Angular CLI**: Una vez instalado Node.js, abrir una terminal (PowerShell o CMD) y ejecutar:
-  ```powershell
-  npm install -g @angular/cli
-  ```
+- **Core:** Angular 21 (Signals, Components, Directives, Services).
+- **Procesamiento:** Web Workers API.
+- **Estilos:** Tailwind CSS / CSS3 Moderno.
+- **Reactividad:** RxJS (Control de intervalos y flujos asíncronos).
+- **Tipado:** TypeScript (Estricto).
 
-### 2. Clonar el Proyecto
+## 🚀 Instalación y Despliegue Local
 
-Abrir tu terminal en la carpeta donde desees guardar el proyecto y ejecutar:
+### Requisitos Previos
 
-```powershell
-git clone https://github.com/Y4nn1s/MonitoreoCriptoActivos.git
-cd MonitoreoCriptoActivos
-```
+- **Node.js**: Versión 18 o superior.
+- **npm**: Gestor de paquetes incluido con Node.js.
+- **Angular CLI**: Instalación global (`npm install -g @angular/cli`).
 
-### 3. Instalar Dependencias
+### Pasos para el Despliegue
 
-Entrar en la carpeta del proyecto de Angular e instalar los paquetes necesarios:
+1. **Clonar el repositorio:**
 
-```powershell
-cd crypto-monitoring-platform
-npm install
-```
+   ```bash
+   git clone https://github.com/Y4nn1s/MonitoreoCriptoActivos.git
+   cd MonitoreoCriptoActivos
+   ```
 
----
+2. **Instalar dependencias:**
 
-## 💻 Ejecución del Proyecto
+   ```bash
+   cd crypto-monitoring-platform
+   npm install
+   ```
 
-Para iniciar el servidor de desarrollo, ejecuta el siguiente comando dentro de la carpeta `crypto-monitoring-platform`:
+3. **Ejecutar en modo desarrollo:**
+   ```bash
+   ng serve
+   ```
+   Accede a la plataforma en `http://localhost:4200/`.
 
-```powershell
-ng serve
-```
+## � Estructura del Proyecto
 
-Una vez que el comando termine de compilar, abre tu navegador y navega a:
-`http://localhost:4200/`
-
----
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Angular 19**: Framework principal.
-- **Signals**: Gestión del estado reactiva y eficiente.
-- **Web Workers**: Procesamiento de datos estadísticos en segundo plano (para no bloquear la interfaz).
-- **Tailwind CSS**: Estilizado moderno y utilitario.
-- **RxJS**: Manejo de flujos de datos asíncronos para la simulación de precios.
-
-## 📝 Notas de Desarrollo
-
-- La aplicación simula cambios de precio cada 200ms para demostrar la capacidad de respuesta de la interfaz.
-- Incluye un sistema de alertas visuales configurable por el usuario.
-- El código está debidamente comentado en español siguiendo estándares profesionales.
+- `src/app/services/`: Lógica central y simulación de datos.
+- `src/app/components/`: Componentes de UI (Dashboard, CryptoCard).
+- `src/app/directives/`: Directivas estructurales para animaciones.
+- `src/app/stats.worker.ts`: Hilo de procesamiento estadístico independiente.
 
 ---
 
 **Desarrollado por:** Yannis Iturriago  
-**Institución:** UNETI - Programación III
+**Institución:** UNETI - Programación III (Trayecto 3, Semestre 5)  
+**Proyecto:** Monitor de Criptoactivos con Angular Signals y Web Workers.

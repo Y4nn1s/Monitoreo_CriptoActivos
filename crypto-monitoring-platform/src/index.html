@@ -1,16 +1,18 @@
 <!doctype html>
-<!-- Archivo raíz de la aplicación web -->
-<html lang="es">
+<!-- Estructura base de la Single Page Application (SPA) -->
+<html lang="es" class="h-full">
 <head>
   <meta charset="utf-8">
   <title>Monitoreo de Criptomonedas</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Política de seguridad para permitir el funcionamiento de Web Workers y estilos inline de Tailwind -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:;">
 </head>
-<body>
-  <!-- Donde se carga toda la lógica de la aplicación -->
+<body class="h-full">
+  <!-- El componente raíz de Angular se monta aquí -->
   <app-root></app-root>
 </body>
 </html>
